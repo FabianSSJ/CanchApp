@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
+import '../widgets/base_screen.dart';  // importa BaseScreen desde widgets
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -28,15 +29,12 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Simular proceso de login
       await Future.delayed(const Duration(seconds: 2));
 
       setState(() {
         _isLoading = false;
       });
 
-      // Aquí iría la lógica real de autenticación
-      // Por ahora, navegar directamente al home del cliente
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/client-home');
       }
@@ -45,22 +43,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.gray50,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
-        
-        title: const Text(
-          'Iniciar Sesión',
-          style: TextStyle(
-            color: AppColors.gray900,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-      ),
-      body: SafeArea(
+    return BaseScreen(
+      title: 'Iniciar Sesión',
+      child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
@@ -68,11 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 40),
-                
-                // Logo and title section
                 Column(
                   children: [
-                    // Logo
                     Container(
                       width: 80,
                       height: 80,
@@ -94,10 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    
                     const SizedBox(height: 24),
-                    
-                    // Welcome title
                     const Text(
                       '¡Bienvenido!',
                       style: TextStyle(
@@ -106,10 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: AppColors.gray900,
                       ),
                     ),
-                    
                     const SizedBox(height: 8),
-                    
-                    // Subtitle
                     const Text(
                       'Ingresa para continuar',
                       style: TextStyle(
@@ -119,14 +95,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                
                 const SizedBox(height: 48),
-                
-                // Form fields
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Email field
                     const Text(
                       'Email',
                       style: TextStyle(
@@ -153,10 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    
                     const SizedBox(height: 24),
-                    
-                    // Password field
                     const Text(
                       'Contraseña',
                       style: TextStyle(
@@ -174,9 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isPasswordVisible 
-                              ? Icons.visibility_off_outlined 
-                              : Icons.visibility_outlined,
+                            _isPasswordVisible
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
                           ),
                           onPressed: () {
                             setState(() {
@@ -197,10 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                
                 const SizedBox(height: 32),
-                
-                // Login button
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -212,27 +178,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       disabledBackgroundColor: AppColors.gray300,
                     ),
                     child: _isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Iniciar Sesión',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      : const Text(
-                          'Iniciar Sesión',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                   ),
                 ),
-                
                 const SizedBox(height: 24),
-                
-                // Forgot password link
                 TextButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/forgot-password');
@@ -246,11 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                
-                const SizedBox(height: 20),  
-                
-                
-                // Register link
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

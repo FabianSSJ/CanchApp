@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart'; // Asegúrate de que la ruta es correcta
+import 'package:provider/provider.dart';
+import 'screens/login_screen.dart';
+import 'providers/theme_provider.dart'; // <-- Agrega esto
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -10,9 +17,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
       title: 'CanchApp',
+      themeMode: themeProvider.themeMode, // <- Aquí se aplica el tema dinámico
       theme: ThemeData(
+        brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF059669)),
         useMaterial3: true,
         inputDecorationTheme: InputDecorationTheme(
@@ -52,10 +63,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-
-      // CAMBIO AQUÍ: se reemplazó WelcomeScreen por LoginScreen
-      home: const LoginScreen(),
-
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        useMaterial3: true,
+      ),
+      home: const LoginScreen(), // <- No se toca
       routes: {
         '/login': (context) => const LoginScreen(),
         //'/register': (context) => const RegisterScreen(),
