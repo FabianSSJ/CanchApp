@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'screens/login_screen.dart';
-import 'providers/theme_provider.dart'; // <-- Agrega esto
+import 'screens/client_home_screen.dart';
+import 'screens/register_type_screen.dart';
+import 'screens/forgot_password_screen.dart';
+import 'screens/profile_screen.dart'; // <-- Importa ProfileScreen aquí
+
+import 'providers/theme_provider.dart';
 
 void main() {
   runApp(
@@ -21,7 +27,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'CanchApp',
-      themeMode: themeProvider.themeMode, // <- Aquí se aplica el tema dinámico
+      themeMode: themeProvider.themeMode,
       theme: ThemeData(
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF059669)),
@@ -67,13 +73,14 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      home: const LoginScreen(), // <- No se toca
+      home: const LoginScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
-        //'/register': (context) => const RegisterScreen(),
-        //'/client-home': (context) => const ClientHomeScreen(),
-        //'/owner-home': (context) => const OwnerHomeScreen(),
-        //'/forgot-password': (context) => const ForgotPasswordScreen(),
+        '/register': (context) => const RegisterTypeScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
+        '/client-home': (context) => const ClientHomeScreen(),
+        '/profile': (context) => const ProfileScreen(), // <-- Aquí la ruta
+        // '/owner-home': (context) => const OwnerHomeScreen(),
       },
     );
   }

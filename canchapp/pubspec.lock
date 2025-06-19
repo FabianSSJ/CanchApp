@@ -122,11 +122,7 @@ packages:
       sha256: "0e0a020085b65b6083975e499759762399b4475f766c21668c4ecca34ea74e5a"
       url: "https://pub.dev"
     source: hosted
-<<<<<<< HEAD
     version: "0.8.0"
-=======
-    version: "0.11.1"
->>>>>>> 3c786d2a85a8839d838c8be43e451801f29b3c08
   material_design_icons_flutter:
     dependency: "direct main"
     description:
@@ -134,7 +130,7 @@ packages:
       sha256: "8c54c21cf336052193559abc64715e4885d6c9220a6dbdfc561a087266cc5385"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.6996"
+    version: "0.11.1"
   meta:
     dependency: transitive
     description:
@@ -237,10 +233,4 @@ packages:
     source: hosted
     version: "13.0.0"
 sdks:
-<<<<<<< HEAD
   dart: ">=3.3.4 <4.0.0"
-  flutter: ">=1.16.0"
-=======
-  dart: ">=3.7.0-0 <4.0.0"
-  flutter: ">=3.18.0-18.0.pre.54"
->>>>>>> 3c786d2a85a8839d838c8be43e451801f29b3c08

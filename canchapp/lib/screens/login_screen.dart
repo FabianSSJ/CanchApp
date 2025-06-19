@@ -35,8 +35,23 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
 
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/client-home');
+      // Datos simulados para login válido
+      const demoEmail = 'usuario@demo.com';
+      const demoPassword = '123456';
+
+      if (_emailController.text == demoEmail && _passwordController.text == demoPassword) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/client-home');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Email o contraseña incorrectos'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
