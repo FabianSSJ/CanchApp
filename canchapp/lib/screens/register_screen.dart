@@ -110,8 +110,8 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                     children: [
                       // Client card
                       _buildUserTypeCard(
-                        type: 'client',
-                        title: 'Cliente',
+                        type: ' Jugador',
+                        title: 'Jugador',
                         description: 'Busca y reserva canchas en Loja',
                         icon: Icons.person_outline,
                         gradient: AppColors.primaryGradient,
@@ -124,8 +124,8 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                       
                       // Owner card
                       _buildUserTypeCard(
-                        type: 'owner',
-                        title: 'Dueño de Cancha',
+                        type: 'Dueño',
+                        title: 'Dueño de Empresa',
                         description: 'Administra y alquila tus canchas',
                         icon: Icons.business_outlined,
                         gradient: AppColors.blueGradient,
@@ -359,10 +359,10 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
 
   String _getUserTypeLabel(String type) {
     switch (type) {
-      case 'client':
-        return 'Cliente';
-      case 'owner':
-        return 'Dueño de Cancha';
+      case 'Jugador':
+        return 'Jugador';
+      case 'Dueño':
+        return 'Dueño de Empresa';
       default:
         return '';
     }

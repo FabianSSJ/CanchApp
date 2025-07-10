@@ -25,11 +25,11 @@ class RegisterTypeScreen extends StatelessWidget {
               onPressed: () {
                 // Aquí puedes navegar a un formulario de cliente
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Formulario de cliente')),
+                  const SnackBar(content: Text('Formulario de Jugador')),
                 );
               },
               icon: const Icon(Icons.person),
-              label: const Text('Cliente'),
+              label: const Text('jugador'),
               style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
             ),
             const SizedBox(height: 20),
@@ -41,7 +41,7 @@ class RegisterTypeScreen extends StatelessWidget {
                 );
               },
               icon: const Icon(Icons.sports_soccer),
-              label: const Text('Dueño de cancha'),
+              label: const Text('Dueño de Empresa'),
               style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
             ),
           ],
