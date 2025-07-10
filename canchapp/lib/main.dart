@@ -4,8 +4,9 @@ import 'package:provider/provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/client_home_screen.dart';
 import 'screens/register_type_screen.dart';
+import 'screens/register_player_screen.dart'; // Nueva importación
 import 'screens/forgot_password_screen.dart';
-import 'screens/profile_screen.dart'; // <-- Importa ProfileScreen aquí
+import 'screens/profile_screen.dart';
 
 import 'providers/theme_provider.dart';
 
@@ -77,9 +78,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterTypeScreen(),
+        '/register-player': (context) => const RegisterPlayerScreen(), // Nueva ruta
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/client-home': (context) => const ClientHomeScreen(),
-        '/profile': (context) => const ProfileScreen(), // <-- Aquí la ruta
+        '/profile': (context) => const ProfileScreen(),
+        // '/register-owner': (context) => const RegisterOwnerScreen(), // Para después
         // '/owner-home': (context) => const OwnerHomeScreen(),
       },
     );

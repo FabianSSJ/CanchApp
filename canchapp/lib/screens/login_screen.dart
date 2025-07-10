@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
-import '../widgets/base_screen.dart';  // importa BaseScreen desde widgets
+import '../widgets/base_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -41,7 +41,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (_emailController.text == demoEmail && _passwordController.text == demoPassword) {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/client-home');
+          // Datos del usuario simulados (en una app real vendrían de la API)
+          final userData = {
+            'userName': 'Juan Pérez',  // Nombre del usuario
+            'userEmail': _emailController.text,
+            'profilePhoto': 'https://ejemplo.com/foto.jpg',  // URL de foto de perfil
+          };
+
+          Navigator.pushReplacementNamed(
+            context,
+            '/client-home',
+            arguments: userData,  // Pasamos los datos del usuario
+          );
         }
       } else {
         if (mounted) {
@@ -56,6 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // El resto del código permanece IGUAL
   @override
   Widget build(BuildContext context) {
     return BaseScreen(
@@ -82,8 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
-                        ],
-                      ),
+                        ),
                       child: const Center(
                         child: Text(
                           '⚽',
