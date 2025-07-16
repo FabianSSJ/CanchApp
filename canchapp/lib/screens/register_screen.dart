@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
+import 'package:flutter/services.dart';
 
 class RegisterTypeScreen extends StatefulWidget {
-  const RegisterTypeScreen({Key? key}) : super(key: key);
+  const RegisterTypeScreen({super.key});
 
   @override
   State<RegisterTypeScreen> createState() => _RegisterTypeScreenState();
 }
 
-class _RegisterTypeScreenState extends State<RegisterTypeScreen> 
+class _RegisterTypeScreenState extends State<RegisterTypeScreen>
     with TickerProviderStateMixin {
   String? selectedUserType;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  static const String userTypeClient = 'client';
+  static const String userTypeOwner = 'owner';
 
   @override
   void initState() {
@@ -22,7 +26,7 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -30,7 +34,7 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
@@ -38,7 +42,7 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
       parent: _animationController,
       curve: Curves.easeOutCubic,
     ));
-    
+
     _animationController.forward();
   }
 
@@ -77,7 +81,6 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
             child: Column(
               children: [
                 const SizedBox(height: 40),
-                
                 // Title section
                 const Column(
                   children: [
@@ -101,16 +104,14 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                     ),
                   ],
                 ),
-                
                 const SizedBox(height: 48),
-                
                 // User type cards
                 Expanded(
                   child: Column(
                     children: [
                       // Client card
                       _buildUserTypeCard(
-                        type: ' Jugador',
+                        type: userTypeClient,
                         title: 'Jugador',
                         description: 'Busca y reserva canchas en Loja',
                         icon: Icons.person_outline,
@@ -119,12 +120,10 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                         featureIcon: Icons.flash_on,
                         featureColor: AppColors.primaryGreen,
                       ),
-                      
                       const SizedBox(height: 24),
-                      
                       // Owner card
                       _buildUserTypeCard(
-                        type: 'Dueño',
+                        type: userTypeOwner,
                         title: 'Dueño de Empresa',
                         description: 'Administra y alquila tus canchas',
                         icon: Icons.business_outlined,
@@ -133,51 +132,49 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                         featureIcon: Icons.trending_up,
                         featureColor: AppColors.primaryBlue,
                       ),
-                      
                       const Spacer(),
                     ],
                   ),
                 ),
-                
                 // Continue button
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   height: selectedUserType != null ? 56 : 0,
                   child: selectedUserType != null
-                    ? SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _navigateToRegistration();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryGreen,
-                            foregroundColor: Colors.white,
-                            elevation: 8,
-                            shadowColor: AppColors.primaryGreen.withOpacity(0.3),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                      ? SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _navigateToRegistration();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryGreen,
+                              foregroundColor: Colors.white,
+                              elevation: 8,
+                              shadowColor:
+                                  AppColors.primaryGreen.withOpacity(0.3),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Continuar como ${_getUserTypeLabel(selectedUserType!)}',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Icon(Icons.arrow_forward, size: 20),
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Continuar como ${_getUserTypeLabel(selectedUserType!)}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward, size: 20),
-                            ],
-                          ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
+                        )
+                      : const SizedBox.shrink(),
                 ),
-                
                 const SizedBox(height: 24),
               ],
             ),
@@ -198,13 +195,12 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
     required Color featureColor,
   }) {
     final isSelected = selectedUserType == type;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
           selectedUserType = type;
         });
-        
         // Haptic feedback
         HapticFeedback.selectionClick();
       },
@@ -220,29 +216,28 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected 
-                ? featureColor.withOpacity(0.2)
-                : Colors.black.withOpacity(0.05),
+              color: isSelected
+                  ? featureColor.withOpacity(0.2)
+                  : Colors.black.withOpacity(0.05),
               blurRadius: isSelected ? 20 : 8,
-              offset: const Offset(0, isSelected ? 8 : 4),
+              offset: Offset(0, isSelected ? 8 : 4),
             ),
           ],
         ),
-        transform: Matrix4.identity()
-          ..scale(isSelected ? 1.02 : 1.0),
+        transform: Matrix4.identity()..scale(isSelected ? 1.02 : 1.0),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            gradient: isSelected 
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    featureColor.withOpacity(0.05),
-                    featureColor.withOpacity(0.02),
-                  ],
-                )
-              : null,
+            gradient: isSelected
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      featureColor.withOpacity(0.05),
+                      featureColor.withOpacity(0.02),
+                    ],
+                  )
+                : null,
           ),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -269,9 +264,7 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                     size: 36,
                   ),
                 ),
-                
                 const SizedBox(width: 20),
-                
                 // Content
                 Expanded(
                   child: Column(
@@ -327,7 +320,6 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                     ],
                   ),
                 ),
-                
                 // Selection indicator
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -342,12 +334,12 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                     ),
                   ),
                   child: isSelected
-                    ? const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 16,
-                      )
-                    : null,
+                      ? const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 16,
+                        )
+                      : null,
                 ),
               ],
             ),
@@ -359,9 +351,9 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
 
   String _getUserTypeLabel(String type) {
     switch (type) {
-      case 'Jugador':
+      case userTypeClient:
         return 'Jugador';
-      case 'Dueño':
+      case userTypeOwner:
         return 'Dueño de Empresa';
       default:
         return '';
@@ -369,9 +361,9 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
   }
 
   void _navigateToRegistration() {
-    if (selectedUserType == 'client') {
+    if (selectedUserType == userTypeClient) {
       Navigator.pushNamed(context, '/register-client');
-    } else if (selectedUserType == 'owner') {
+    } else if (selectedUserType == userTypeOwner) {
       Navigator.pushNamed(context, '/register-owner');
     }
   }

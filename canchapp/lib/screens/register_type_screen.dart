@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../../utils/colors.dart';
 
 class RegisterTypeScreen extends StatefulWidget {
-  const RegisterTypeScreen({Key? key}) : super(key: key);
+  const RegisterTypeScreen({super.key});
 
   @override
   State<RegisterTypeScreen> createState() => _RegisterTypeScreenState();
@@ -225,7 +225,7 @@ class _RegisterTypeScreenState extends State<RegisterTypeScreen>
                 ? featureColor.withOpacity(0.2)
                 : Colors.black.withOpacity(0.05),
               blurRadius: isSelected ? 20 : 8,
-              offset: const Offset(0, isSelected ? 8 : 4),
+              offset: Offset(0, isSelected ? 8 : 4),
             ),
           ],
         ),

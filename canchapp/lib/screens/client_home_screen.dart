@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 
 class ClientHomeScreen extends StatelessWidget {
-  const ClientHomeScreen({Key? key}) : super(key: key);
+  const ClientHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     // Usuario simulado
-    final String userName = 'Juan Pérez';
-    final String userEmail = 'usuario@demo.com';
+    const String userName = 'Juan Pérez';
+    const String userEmail = 'usuario@demo.com';
 
     return Scaffold(
       appBar: AppBar(
@@ -19,7 +19,7 @@ class ClientHomeScreen extends StatelessWidget {
         child: Column(
           children: [
             UserAccountsDrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: AppColors.primaryGradient,
               ),
               accountName: Text(
@@ -31,7 +31,7 @@ class ClientHomeScreen extends StatelessWidget {
                 backgroundColor: Colors.white,
                 child: Text(
                   userName.substring(0, 1), // Inicial del nombre
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 40,
                     color: AppColors.primaryGreen,
                     fontWeight: FontWeight.bold,

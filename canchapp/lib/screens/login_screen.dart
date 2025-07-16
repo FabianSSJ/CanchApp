@@ -3,7 +3,7 @@ import '../../utils/colors.dart';
 import '../widgets/base_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
-                        ),
+                  ]),
                       child: const Center(
                         child: Text(
                           '⚽',
