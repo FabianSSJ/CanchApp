@@ -25,31 +25,18 @@ class _RegisterPlayerScreenState extends State<RegisterPlayerScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   
-  // Variable para almacenar la contraseña de confirmación
+  // Variables para almacenar las contraseñas directamente
+  String _password = '';
   String _confirmPassword = '';
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       
-      // Verificar que las contraseñas coincidan
-      if (_userData['user_hashed_password'] != _confirmPassword) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Error'),
-            content: const Text('Las contraseñas no coinciden'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-        return;
-      }
+      // Asignar la contraseña al mapa después de save()
+      _userData['user_hashed_password'] = _password;
       
+      // Lógica original de envío al servidor
       try {
         final response = await http.post(
           Uri.parse('http://localhost:3000/users/create'),
@@ -58,10 +45,10 @@ class _RegisterPlayerScreenState extends State<RegisterPlayerScreen> {
         );
 
         if (response.statusCode == 201) {
-          // Registro exitoso
+          // Registro exitoso - misma lógica original
           Navigator.pushReplacementNamed(context, '/login');
         } else {
-          // Manejar error
+          // Manejar error - misma lógica original
           showDialog(
             context: context,
             builder: (ctx) => AlertDialog(
@@ -77,11 +64,12 @@ class _RegisterPlayerScreenState extends State<RegisterPlayerScreen> {
           );
         }
       } catch (e) {
+        // Manejar error de conexión - misma lógica original
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('Error de conexión'),
-            content: Text('No se pudo conectar al servidor: $e'),
+            content: const Text('No se pudo conectar al servidor.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
@@ -266,7 +254,7 @@ class _RegisterPlayerScreenState extends State<RegisterPlayerScreen> {
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                               ),
                               obscureText: _obscurePassword,
-                              onSaved: (value) => _userData['user_hashed_password'] = value ?? '',
+                              onChanged: (value) => _password = value,
                               validator: (value) {
                                 if (value == null || value.isEmpty) return 'Requerido';
                                 if (value.length < 6) return 'Mínimo 6 caracteres';
@@ -305,7 +293,7 @@ class _RegisterPlayerScreenState extends State<RegisterPlayerScreen> {
                               onChanged: (value) => _confirmPassword = value,
                               validator: (value) {
                                 if (value == null || value.isEmpty) return 'Por favor repita la contraseña';
-                                if (value != _userData['user_hashed_password']) {
+                                if (value != _password) {
                                   return 'Las contraseñas no coinciden';
                                 }
                                 return null;

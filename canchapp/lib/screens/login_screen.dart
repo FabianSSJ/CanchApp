@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../../utils/colors.dart';
 import '../widgets/base_screen.dart';
 
@@ -29,36 +31,136 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        // Realizar petición HTTP al backend
+        final response = await http.post(
+          Uri.parse('http://localhost:3000/api/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'user_email': _emailController.text,
+            'user_hashed_password': _passwordController.text,  // Cambiado aquí
+          }),
+        );
 
-      setState(() {
-        _isLoading = false;
-      });
+        setState(() {
+          _isLoading = false;
+        });
 
-      // Datos simulados para login válido
-      const demoEmail = 'usuario@demo.com';
-      const demoPassword = '123456';
+        print('Status Code: ${response.statusCode}');
+        print('Response Body: ${response.body}');
 
-      if (_emailController.text == demoEmail && _passwordController.text == demoPassword) {
-        if (mounted) {
-          // Datos del usuario simulados (en una app real vendrían de la API)
-          final userData = {
-            'userName': 'Juan Pérez',  // Nombre del usuario
-            'userEmail': _emailController.text,
-            'profilePhoto': 'https://ejemplo.com/foto.jpg',  // URL de foto de perfil
-          };
+        if (response.statusCode == 200) {
+          final responseData = json.decode(response.body);
+          
+          // El backend devuelve directamente los datos del usuario, no dentro de 'status'
+          if (responseData['message'] == 'Login exitoso') {
+            // Login exitoso
+            final userData = responseData['user'];
+            final userRole = userData['role'];  // El backend devuelve 'role', no 'user_role'
 
-          Navigator.pushReplacementNamed(
-            context,
-            '/client-home',
-            arguments: userData,  // Pasamos los datos del usuario
-          );
+            if (mounted) {
+              // Preparar datos del usuario para pasar a las pantallas
+              final userDataForNavigation = {
+                'userName': userData['name'],  // El backend devuelve 'name', no 'user_name'
+                'userEmail': userData['email'],
+                'profilePhoto': '', // No viene en la respuesta actual
+                'userPhone': '', // No viene en la respuesta actual
+                'userRole': userRole,
+                'userId': userData['id'],
+                'token': responseData['token'], // Guardar token para futuras peticiones
+              };
+
+              // Navegar según el rol del usuario
+              switch (userRole) {
+                case 'jugador':
+                  Navigator.pushReplacementNamed(
+                    context,
+                    '/client-home',
+                    arguments: userDataForNavigation,
+                  );
+                  break;
+                case 'dueño':
+                case 'dueno':
+                  // Por ahora redirigir a client-home hasta que esté la pantalla de dueño
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Pantalla de dueño en desarrollo. Accediendo como jugador temporalmente.'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                  Navigator.pushReplacementNamed(
+                    context,
+                    '/client-home',
+                    arguments: userDataForNavigation,
+                  );
+                  break;
+                case 'administrador':
+                  // Por ahora redirigir a client-home hasta que esté la pantalla de admin
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Pantalla de administrador en desarrollo. Accediendo como jugador temporalmente.'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                  Navigator.pushReplacementNamed(
+                    context,
+                    '/client-home',
+                    arguments: userDataForNavigation,
+                  );
+                  break;
+                default:
+                  // Por defecto ir a jugador
+                  Navigator.pushReplacementNamed(
+                    context,
+                    '/client-home',
+                    arguments: userDataForNavigation,
+                  );
+              }
+            }
+          } else {
+            // Error de autenticación
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(responseData['message'] ?? 'Email o contraseña incorrectos'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        } else {
+          // Error del servidor - mostrar más detalles
+          String errorMessage = 'Error del servidor. Intenta nuevamente.';
+          
+          try {
+            final errorData = json.decode(response.body);
+            if (errorData['message'] != null) {
+              errorMessage = errorData['message'];
+            }
+          } catch (e) {
+            // Si no se puede decodificar JSON, usar mensaje por defecto
+            errorMessage = 'Error ${response.statusCode}: ${response.body}';
+          }
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errorMessage),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          }
         }
-      } else {
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Email o contraseña incorrectos'),
+              content: Text('Error de conexión. Verifica tu internet.'),
               backgroundColor: Colors.red,
             ),
           );
@@ -67,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // El resto del código permanece IGUAL
+  // El resto del código permanece EXACTAMENTE IGUAL - Sin cambios en el diseño
   @override
   Widget build(BuildContext context) {
     return BaseScreen(
