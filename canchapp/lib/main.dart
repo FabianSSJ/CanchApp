@@ -7,8 +7,12 @@ import 'screens/register_type_screen.dart';
 import 'screens/register_player_screen.dart'; // Nueva importación
 import 'screens/forgot_password_screen.dart';
 import 'screens/profile_screen.dart';
-
+import 'screens/owner_home_screen.dart';
+import 'screens/register_owner_screen.dart';
 import 'providers/theme_provider.dart';
+import 'screens/create_field_screen.dart';
+import 'screens/fields_list_screen.dart';
+import 'screens/field_detail_screen.dart';
 
 void main() {
   runApp(
@@ -78,12 +82,15 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterTypeScreen(),
-        '/register-player': (context) => const RegisterPlayerScreen(), // Nueva ruta
+        '/register-player': (context) => const RegisterPlayerScreen(),
+        '/register-owner': (context) => const RegisterOwnerScreen(), // Nueva ruta
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/client-home': (context) => const ClientHomeScreen(),
         '/profile': (context) => const ProfileScreen(),
-        // '/register-owner': (context) => const RegisterOwnerScreen(), // Para después
-        // '/owner-home': (context) => const OwnerHomeScreen(),
+        '/owner-home': (context) => const OwnerHomeScreen(), //
+        '/create_field': (context) => const CreateFieldScreen(),
+        '/fields_list': (context) => const FieldsListScreen(),
+        '/field_detail': (context) => const FieldDetailScreen(),
       },
     );
   }

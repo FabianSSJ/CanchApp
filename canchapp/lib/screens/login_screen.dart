@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
           headers: {'Content-Type': 'application/json'},
           body: json.encode({
             'user_email': _emailController.text,
-            'user_hashed_password': _passwordController.text,  // Cambiado aquí
+            'user_hashed_password': _passwordController.text,
           }),
         );
 
@@ -52,25 +52,22 @@ class _LoginScreenState extends State<LoginScreen> {
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           
-          // El backend devuelve directamente los datos del usuario, no dentro de 'status'
           if (responseData['message'] == 'Login exitoso') {
-            // Login exitoso
             final userData = responseData['user'];
-            final userRole = userData['role'];  // El backend devuelve 'role', no 'user_role'
+            final userRole = userData['role'];
 
             if (mounted) {
-              // Preparar datos del usuario para pasar a las pantallas
               final userDataForNavigation = {
-                'userName': userData['name'],  // El backend devuelve 'name', no 'user_name'
+                'userName': userData['name'],
                 'userEmail': userData['email'],
-                'profilePhoto': '', // No viene en la respuesta actual
-                'userPhone': '', // No viene en la respuesta actual
+                'profilePhoto': '',
+                'userPhone': '',
                 'userRole': userRole,
                 'userId': userData['id'],
-                'token': responseData['token'], // Guardar token para futuras peticiones
+                'token': responseData['token'],
               };
 
-              // Navegar según el rol del usuario
+              // SOLO SE MODIFICÓ ESTA SECCIÓN
               switch (userRole) {
                 case 'jugador':
                   Navigator.pushReplacementNamed(
@@ -81,21 +78,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   break;
                 case 'dueño':
                 case 'dueno':
-                  // Por ahora redirigir a client-home hasta que esté la pantalla de dueño
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Pantalla de dueño en desarrollo. Accediendo como jugador temporalmente.'),
-                      backgroundColor: Colors.orange,
-                    ),
-                  );
                   Navigator.pushReplacementNamed(
                     context,
-                    '/client-home',
+                    '/owner-home',
                     arguments: userDataForNavigation,
                   );
                   break;
                 case 'administrador':
-                  // Por ahora redirigir a client-home hasta que esté la pantalla de admin
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Pantalla de administrador en desarrollo. Accediendo como jugador temporalmente.'),
@@ -109,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                   break;
                 default:
-                  // Por defecto ir a jugador
                   Navigator.pushReplacementNamed(
                     context,
                     '/client-home',
@@ -118,7 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
               }
             }
           } else {
-            // Error de autenticación
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -129,7 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
             }
           }
         } else {
-          // Error del servidor - mostrar más detalles
           String errorMessage = 'Error del servidor. Intenta nuevamente.';
           
           try {
@@ -138,7 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
               errorMessage = errorData['message'];
             }
           } catch (e) {
-            // Si no se puede decodificar JSON, usar mensaje por defecto
             errorMessage = 'Error ${response.statusCode}: ${response.body}';
           }
           
@@ -169,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // El resto del código permanece EXACTAMENTE IGUAL - Sin cambios en el diseño
+  // EL RESTO DEL CÓDIGO PERMANECE EXACTAMENTE IGUAL
   @override
   Widget build(BuildContext context) {
     return BaseScreen(
