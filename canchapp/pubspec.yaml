@@ -34,16 +34,21 @@ dependencies:
   material_design_icons_flutter: ^5.0.6996 # Para más iconos si necesitas
   provider: ^6.1.1
   http: ^1.1.0
-  image_picker: ^1.0.4
+  image_picker: ^1.0.7
   shared_preferences: ^2.2.2
+  intl: ^0.19.0
+  path_provider: ^2.1.2 
+  cached_network_image: ^3.3.1
+  cupertino_icons: ^1.0.6
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.6
+  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+    
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

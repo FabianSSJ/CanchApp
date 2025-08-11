@@ -1,171 +1,585 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/field_service.dart';
+import '../services/booking_service.dart';
+import '../services/statistics_service.dart';
 
-class OwnerHomeScreen extends StatelessWidget {
+class OwnerHomeScreen extends StatefulWidget {
   const OwnerHomeScreen({super.key});
 
   @override
+  State<OwnerHomeScreen> createState() => _OwnerHomeScreenState();
+}
+
+class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
+  String? userName;
+  String? userEmail;
+  int? companyId;
+  bool _isLoading = true;
+  
+  // Datos reales
+  Map<String, dynamic> businessSummary = {
+    'todayBookings': 0,
+    'monthlyIncome': 0.0,
+    'activeFields': 0,
+    'newClients': 0,
+  };
+  
+  List<Map<String, dynamic>> upcomingBookings = [];
+  List<Map<String, dynamic>> weeklyStats = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        userName = prefs.getString('user_name') ?? 'Usuario';
+        userEmail = prefs.getString('user_email') ?? '';
+        companyId = prefs.getInt('company_id');
+      });
+
+      if (companyId != null) {
+        await _loadBusinessData();
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadBusinessData() async {
+    if (companyId == null) return;
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      
+      print('🔄 CARGANDO DATOS REALES DEL NEGOCIO');
+      print('Token: ${token.substring(0, 20)}...');
+      print('Company ID: $companyId');
+      
+      // Cargar datos en paralelo
+      await Future.wait([
+        _loadDashboardStats(token),
+        _loadUpcomingBookings(token),
+        _loadWeeklyStats(token),
+      ]);
+      
+    } catch (e) {
+      print('Error loading business data: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error cargando datos: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _loadDashboardStats(String token) async {
+    try {
+      print('📊 Cargando estadísticas del dashboard...');
+      
+      final result = await StatisticsService.getDashboardStats(
+        token: token,
+        companyId: companyId!,
+      );
+      
+      print('📊 Dashboard result: $result');
+      
+      if (result['success']) {
+        setState(() {
+          businessSummary['todayBookings'] = result['todayBookings'] ?? 0;
+          businessSummary['monthlyIncome'] = result['monthlyIncome'] ?? 0.0;
+          businessSummary['activeFields'] = result['activeFields'] ?? 0;
+          businessSummary['newClients'] = result['newClients'] ?? 0;
+        });
+        
+        print('✅ Dashboard stats cargadas exitosamente');
+        print('   - Reservas hoy: ${businessSummary['todayBookings']}');
+        print('   - Ingresos mes: ${businessSummary['monthlyIncome']}');
+        print('   - Canchas activas: ${businessSummary['activeFields']}');
+        print('   - Clientes nuevos: ${businessSummary['newClients']}');
+      } else {
+        print('❌ Error en dashboard stats: ${result['message']}');
+      }
+    } catch (e) {
+      print('❌ Excepción en _loadDashboardStats: $e');
+    }
+  }
+
+  Future<void> _loadUpcomingBookings(String token) async {
+    try {
+      print('📅 Cargando próximas reservas...');
+      
+      final result = await BookingService.getUpcomingBookings(
+        token: token,
+        companyId: companyId!,
+        limit: 3,
+      );
+      
+      print('📅 Upcoming bookings result: $result');
+      
+      if (result['success']) {
+        setState(() {
+          upcomingBookings = List<Map<String, dynamic>>.from(result['data'] ?? []);
+        });
+        
+        print('✅ Próximas reservas cargadas: ${upcomingBookings.length}');
+      } else {
+        print('❌ Error en upcoming bookings: ${result['message']}');
+      }
+    } catch (e) {
+      print('❌ Excepción en _loadUpcomingBookings: $e');
+    }
+  }
+
+  Future<void> _loadWeeklyStats(String token) async {
+    try {
+      print('📈 Cargando estadísticas semanales...');
+      
+      final result = await StatisticsService.getWeeklyStats(
+        token: token,
+        companyId: companyId!,
+      );
+      
+      if (result['success']) {
+        setState(() {
+          weeklyStats = List<Map<String, dynamic>>.from(result['chartData'] ?? []);
+        });
+        
+        print('✅ Estadísticas semanales cargadas: ${weeklyStats.length}');
+      }
+    } catch (e) {
+      print('❌ Error en _loadWeeklyStats: $e');
+    }
+  }
+
+  Future<void> _logout() async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cerrar Sesión'),
+        content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); // Cerrar diálogo
+              
+              // Limpiar datos de sesión
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              
+              // Mostrar mensaje
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Sesión cerrada correctamente'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              
+              // Navegar al login
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/login',
+                (route) => false,
+              );
+            },
+            child: const Text(
+              'Cerrar Sesión',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF059669),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Panel de Dueño'),
-        centerTitle: true,
+        title: Text('Hola, $userName'),
+        centerTitle: false,
         backgroundColor: const Color(0xFF059669),
         foregroundColor: Colors.white,
         elevation: 4,
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.person),
             onPressed: () {
-              Navigator.pushNamed(context, '/profile');
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Notificaciones en desarrollo')),
+              );
             },
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.person),
+            onSelected: (value) {
+              switch (value) {
+                case 'profile':
+                  Navigator.pushNamed(context, '/profile');
+                  break;
+                case 'settings':
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Configuración en desarrollo')),
+                  );
+                  break;
+                case 'logout':
+                  _logout();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('Perfil'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.settings, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('Configuración'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            const Text(
-              'Resumen de Negocio',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF059669),
-              ),
-            ),
-            const SizedBox(height: 15),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 1.5,
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
-              children: [
-                _buildSummaryCard('Reservas Hoy', '12', MdiIcons.calendarCheck, Colors.blue),
-                _buildSummaryCard('Ingresos Mensuales', '\$2,450', MdiIcons.cash, Colors.green),
-                _buildSummaryCard('Canchas Activas', '4', MdiIcons.soccerField, Colors.orange),
-                _buildSummaryCard('Clientes Nuevos', '8', MdiIcons.accountGroup, Colors.purple),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-            const Text(
-              'Gestión Rápida',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF059669),
-              ),
-            ),
-            const SizedBox(height: 15),
-            GridView.count(
-              crossAxisCount: 4,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 0.9,
-              children: [
-                _buildActionButton(context, 'Agregar Cancha', Icons.add, Colors.blue),
-                _buildActionButton(context, 'Reservas', Icons.calendar_today, Colors.green),
-                _buildActionButton(context, 'Clientes', Icons.people, Colors.orange),
-                _buildActionButton(context, 'Reportes', Icons.bar_chart, Colors.purple),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Próximas Reservas',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF059669),
+      body: RefreshIndicator(
+        color: const Color(0xFF059669),
+        onRefresh: _loadBusinessData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Información de la empresa
+              if (companyId == null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[50],
+                    border: Border.all(color: Colors.orange),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Column(
+                    children: [
+                      Icon(Icons.warning, color: Colors.orange, size: 32),
+                      SizedBox(height: 8),
+                      Text(
+                        'No tienes una empresa registrada',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Necesitas registrar una empresa para gestionar canchas',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.orange),
+                      ),
+                    ],
                   ),
                 ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Ver Todas',
-                    style: TextStyle(color: Color(0xFF059669)),
-                  ),
-                ),
+                const SizedBox(height: 20),
               ],
-            ),
-            const SizedBox(height: 10),
-            _buildReservationItem('Cancha 1', 'Juan Pérez', '18:00 - 20:00'),
-            _buildReservationItem('Cancha 2', 'Carlos Gómez', '19:00 - 21:00'),
-            _buildReservationItem('Cancha 3', 'María Rodríguez', '20:00 - 22:00'),
 
-            const SizedBox(height: 30),
-            const Text(
-              'Estadísticas Mensuales',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF059669),
+              const SizedBox(height: 10),
+              const Text(
+                'Resumen de Negocio',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF059669),
+                ),
               ),
-            ),
-            const SizedBox(height: 15),
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
+              const SizedBox(height: 15),
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                childAspectRatio: 1.5,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+                children: [
+                  _buildSummaryCard(
+                    'Reservas Hoy',
+                    '${businessSummary['todayBookings']}',
+                    MdiIcons.calendarCheck,
+                    Colors.blue,
+                  ),
+                  _buildSummaryCard(
+                    'Ingresos Mensuales',
+                    '\$${businessSummary['monthlyIncome'].toStringAsFixed(2)}',
+                    MdiIcons.cash,
+                    Colors.green,
+                  ),
+                  _buildSummaryCard(
+                    'Canchas Activas',
+                    '${businessSummary['activeFields']}',
+                    MdiIcons.soccerField,
+                    Colors.orange,
+                  ),
+                  _buildSummaryCard(
+                    'Clientes Nuevos',
+                    '${businessSummary['newClients']}',
+                    MdiIcons.accountGroup,
+                    Colors.purple,
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(15),
-              child: Column(
+
+              const SizedBox(height: 30),
+              const Text(
+                'Gestión Rápida',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF059669),
+                ),
+              ),
+              const SizedBox(height: 15),
+              GridView.count(
+                crossAxisCount: 4,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                childAspectRatio: 0.9,
                 children: [
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _buildChartBar(80, 'Lun'),
-                        _buildChartBar(120, 'Mar'),
-                        _buildChartBar(160, 'Mié'),
-                        _buildChartBar(200, 'Jue'),
-                        _buildChartBar(180, 'Vie'),
-                        _buildChartBar(140, 'Sáb'),
-                        _buildChartBar(100, 'Dom'),
-                      ],
+                  _buildActionButton(context, 'Agregar Cancha', Icons.add, Colors.blue),
+                  _buildActionButton(context, 'Reservas', Icons.calendar_today, Colors.green),
+                  _buildActionButton(context, 'Clientes', Icons.people, Colors.orange),
+                  _buildActionButton(context, 'Reportes', Icons.bar_chart, Colors.purple),
+                ],
+              ),
+
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Próximas Reservas',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF059669),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Ingresos por día (\$)',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/owner_bookings');
+                    },
+                    child: const Text(
+                      'Ver Todas',
+                      style: TextStyle(color: Color(0xFF059669)),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              
+              // Próximas reservas
+              if (upcomingBookings.isEmpty) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.calendar_month,
+                        size: 48,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No hay reservas próximas',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Las reservas aparecerán aquí cuando se hagan',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                ...upcomingBookings.take(3).map((booking) => 
+                  _buildReservationItem(
+                    booking['field_name'] ?? 'Cancha',
+                    booking['client_name'] ?? 'Cliente',
+                    booking['time_range'] ?? 'Horario',
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 30),
+              const Text(
+                'Estadísticas Mensuales',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF059669),
+                ),
+              ),
+              const SizedBox(height: 15),
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(15),
+                child: weeklyStats.isEmpty
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.bar_chart,
+                            size: 48,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'No hay estadísticas disponibles',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Los datos aparecerán cuando tengas reservas',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                _buildChartBar(80, 'Lun'),
+                                _buildChartBar(120, 'Mar'),
+                                _buildChartBar(160, 'Mié'),
+                                _buildChartBar(200, 'Jue'),
+                                _buildChartBar(180, 'Vie'),
+                                _buildChartBar(140, 'Sáb'),
+                                _buildChartBar(100, 'Dom'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Reservas por día',
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, '/create_field');
+        },
         backgroundColor: const Color(0xFF059669),
         child: const Icon(Icons.add, color: Colors.white),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: 0,
         selectedItemColor: const Color(0xFF059669),
         unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              // Ya estamos en home
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/owner_bookings');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/owner_fields');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/profile');
+              break;
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -176,7 +590,7 @@ class OwnerHomeScreen extends StatelessWidget {
             label: 'Reservas',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
+            icon: Icon(Icons.sports_soccer),
             label: 'Canchas',
           ),
           BottomNavigationBarItem(
@@ -225,7 +639,11 @@ class OwnerHomeScreen extends StatelessWidget {
       onTap: () {
         switch (label) {
           case 'Agregar Cancha':
-            Navigator.pushNamed(context, '/create_field');
+            if (companyId == null) {
+              _showNoCompanyDialog();
+            } else {
+              Navigator.pushNamed(context, '/create_field');
+            }
             break;
           case 'Reservas':
             Navigator.pushNamed(context, '/owner_bookings');
@@ -254,6 +672,24 @@ class OwnerHomeScreen extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNoCompanyDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Empresa Requerida'),
+        content: const Text(
+          'Necesitas registrar una empresa antes de poder agregar canchas.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart'; // 🔥 AGREGADO
 import 'dart:convert';
 import '../../utils/colors.dart';
 import '../widgets/base_screen.dart';
@@ -23,6 +24,51 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  // 🔥 NUEVO: Método para obtener company_id del dueño usando el endpoint LIST
+  Future<int?> _getCompanyId(String token, int userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/companies/list'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('📋 Companies list response: $data');
+        
+        // Si la respuesta es una lista directa
+        if (data is List) {
+          for (var company in data) {
+            // Buscar por company_user_id (clave foránea del dueño)
+            if (company['company_user_id'] == userId) {
+              return company['company_id'];
+            }
+          }
+        }
+        // Si la respuesta tiene una propiedad 'companies' o 'data'
+        else if (data is Map) {
+          List companies = data['companies'] ?? data['data'] ?? [];
+          for (var company in companies) {
+            // Buscar por company_user_id (clave foránea del dueño)
+            if (company['company_user_id'] == userId) {
+              return company['company_id'];
+            }
+          }
+        }
+        
+        print('⚠️ No se encontró empresa para el usuario $userId');
+      } else {
+        print('❌ Error en companies/list: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('❌ ERROR obteniendo company_id: $e');
+    }
+    return null;
   }
 
   Future<void> _handleLogin() async {
@@ -55,6 +101,33 @@ class _LoginScreenState extends State<LoginScreen> {
           if (responseData['message'] == 'Login exitoso') {
             final userData = responseData['user'];
             final userRole = userData['role'];
+            final String token = responseData['token'];
+
+            // 🔥 GUARDAR EN SHARED PREFERENCES
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('token', token);
+            await prefs.setInt('user_id', userData['id']);
+            await prefs.setString('user_name', userData['name']);
+            await prefs.setString('user_email', userData['email']);
+            await prefs.setString('user_role', userRole);
+
+            print('✅ TOKEN GUARDADO: ${token.substring(0, 20)}...');
+            print('✅ USER DATA GUARDADO: ${userData['name']} - $userRole');
+
+            // 🔥 Si es dueño, obtener y guardar company_id
+            if (userRole == 'dueño' || userRole == 'dueno') {
+              try {
+                final companyId = await _getCompanyId(token, userData['id']);
+                if (companyId != null) {
+                  await prefs.setInt('company_id', companyId);
+                  print('✅ COMPANY ID GUARDADO: $companyId');
+                } else {
+                  print('⚠️ No se pudo obtener company_id');
+                }
+              } catch (e) {
+                print('⚠️ Error obteniendo company_id: $e');
+              }
+            }
 
             if (mounted) {
               final userDataForNavigation = {
@@ -64,10 +137,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 'userPhone': '',
                 'userRole': userRole,
                 'userId': userData['id'],
-                'token': responseData['token'],
+                'token': token,
               };
 
-              // SOLO SE MODIFICÓ ESTA SECCIÓN
+              // NAVEGACIÓN (sin cambios)
               switch (userRole) {
                 case 'jugador':
                   Navigator.pushReplacementNamed(
