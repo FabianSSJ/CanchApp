@@ -583,7 +583,10 @@ class _FieldReservationScreenState extends State<FieldReservationScreen> {
     print('🔍 Obteniendo horarios disponibles para cancha $fieldId en fecha $formattedDate');
     
     // 🔥 LLAMAR A LA API REAL
-    final result = await FieldService.getAvailableSlots(fieldId, formattedDate);
+    final result = await ReservationService.getAvailableTimeSlots(
+      fieldId: fieldId,
+      date: formattedDate,
+    );
     
     print('📄 Resultado horarios: $result');
     
@@ -750,11 +753,16 @@ String _convertTo24Hour(String time12) {
     
     print('🕐 Horario seleccionado: $_selectedTimeSlot');
     print('🕐 Convertido a: $startTime - $endTime');
+    print('🔍 DEBUG - Valores antes de crear reserva:');
+    print('cancha[field_id]: ${cancha['field_id']} (tipo: ${cancha['field_id'].runtimeType})');
+    print('userData[user_id]: ${userData['user_id']} (tipo: ${userData['user_id'].runtimeType})');
+    print('cancha completa: $cancha');
+    print('userData completo: $userData');
 
     // Llamar al servicio de reservas (cuando lo implementes)
     final result = await ReservationService.createReservation(
-      fieldId: cancha['field_id'],
-      userId: userData['user_id'],
+      fieldId: cancha['field_id'] ?? 0,
+      userId: userData['user_id'] ?? 0,
       date: _formatDateForApi(_selectedDate!),
       startTime: startTime,
       endTime: endTime,

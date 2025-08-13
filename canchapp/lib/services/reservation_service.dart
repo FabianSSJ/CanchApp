@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ReservationService {
-  static const String baseUrl = 'YOUR_API_BASE_URL'; // Cambia por tu URL de API
+  static const String baseUrl = 'http://10.0.2.2:3000'; // Cambia por tu URL de API
   
   /// Crear una nueva reserva con comprobante de pago
   static Future<Map<String, dynamic>> createReservation({
@@ -24,7 +25,7 @@ class ReservationService {
       // Crear MultipartRequest para subir imagen
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('$baseUrl/reservations/create'),
+        Uri.parse('$baseUrl/calendars/create'),
       );
 
       // Agregar campos de texto
@@ -32,9 +33,9 @@ class ReservationService {
         'field_id': fieldId.toString(),
         'user_id': userId.toString(),
         'calendar_date': date,
-        'start_time': startTime,
-        'end_time': endTime,
-        'payment_amount': paymentAmount.toString(),
+        'calendar_init_time': startTime,
+        'calendar_end_time': endTime,
+        'calendar_transaccion': paymentAmount.toString(),
       });
 
       // Agregar imagen del comprobante
@@ -99,7 +100,7 @@ class ReservationService {
       print('Field ID: $fieldId, Fecha: $date');
 
       final response = await http.get(
-        Uri.parse('$baseUrl/reservations/available-slots?field_id=$fieldId&date=$date'),
+        Uri.parse('$baseUrl/fields/$fieldId/available-slots?date=$date'),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -142,12 +143,23 @@ class ReservationService {
     try {
       print('🔍 Obteniendo reservas del usuario: $userId');
 
-      final response = await http.get(
-        Uri.parse('$baseUrl/reservations/user/$userId'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
+      final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    
+    if (token == null || token.isEmpty) {
+      return {
+        'success': false,
+        'message': 'No se encontró token de autenticación',
+      };
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/calendars/user/$userId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // 🔥 AGREGAR TOKEN
+      },
+    );
 
       print('📥 Respuesta reservas - Status: ${response.statusCode}');
 
@@ -388,4 +400,6 @@ class ReservationService {
     final timeRegex = RegExp(r'^([01]?[0-9]|2[0-3]):[0-5][0-9]$');
     return timeRegex.hasMatch(time);
   }
+  
+  
 }

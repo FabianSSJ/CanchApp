@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../utils/colors.dart';
 import '../services/field_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({super.key});
@@ -995,8 +997,12 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
             title: const Text('Mis Reservas'),
             onTap: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Funcionalidad en desarrollo')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MyReservationsScreen(),
+                ),
+            
               );
             },
           ),
@@ -1035,10 +1041,25 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   // MÉTODO _showReservarDialog CORREGIDO
-  void _showReservarDialog(BuildContext context, Map<String, dynamic> cancha) {
-    final Map<String, dynamic>? userData = 
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    
+  Future <void> _showReservarDialog(BuildContext context, Map<String, dynamic> cancha)async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = {
+    'user_id': prefs.getInt('user_id') ?? 0,
+    'user_name': prefs.getString('user_name') ?? 'Usuario',
+    'user_email': prefs.getString('user_email') ?? 'email@ejemplo.com',
+    'user_role': prefs.getString('user_role') ?? 'cliente',
+    'company_id': prefs.getInt('company_id') ?? 0,
+  };
+   print('🔍 DEBUG - userData obtenido de SharedPreferences: $userData');
+   if (userData['user_id'] == 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('⚠️ Sesión expirada. Por favor, inicia sesión nuevamente.'),
+        backgroundColor: Colors.orange,
+      ),
+    );
+    return;
+  }  
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

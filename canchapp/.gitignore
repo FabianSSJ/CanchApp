@@ -41,3 +41,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+admin_panel/node_modules/
+admin_panel/build/
+admin_panel/.env.local

@@ -64,7 +64,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
       
       try {
         final response = await http.post(
-          Uri.parse('http://localhost:3000/users/create'),
+          Uri.parse('http://10.0.2.2:3000/users/create'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode(_userData),
         );
@@ -91,7 +91,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
   Future<void> _loginUser() async {
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:3000/api/login'),
+        Uri.parse('http://10.0.2.2:3000/api/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'user_email': _userData['user_email'],
@@ -126,7 +126,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://localhost:3000/companies/create'),
+          Uri.parse('http://10.0.2.2:3000/companies/create'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $_userToken',

@@ -39,7 +39,7 @@ class _RegisterPlayerScreenState extends State<RegisterPlayerScreen> {
       // Lógica original de envío al servidor
       try {
         final response = await http.post(
-          Uri.parse('http://localhost:3000/users/create'),
+          Uri.parse('http://10.0.2.2:3000/users/create'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode(_userData),
         );

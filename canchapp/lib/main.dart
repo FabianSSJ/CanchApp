@@ -14,6 +14,7 @@ import 'screens/create_field_screen.dart';
 import 'screens/fields_list_screen.dart';
 import 'screens/field_detail_screen.dart';
 import 'screens/client/field_reservation_screen.dart';
+import 'screens/my_reservations_screen.dart';
 
 void main() {
   runApp(
@@ -93,6 +94,7 @@ class MyApp extends StatelessWidget {
         '/fields_list': (context) => const FieldsListScreen(),
         '/field_detail': (context) => const FieldDetailScreen(),
         '/field-reservation': (context) => const FieldReservationScreen(),
+        '/my-reservations': (context) => const MyReservationsScreen(),
       },
     );
   }
