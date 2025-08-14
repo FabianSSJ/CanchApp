@@ -130,65 +130,83 @@ const Payments = () => {
   };
 
   // ✅ Aprobar pago
-  const handleApprovePayment = async () => {
-    if (!selectedPayment || !rejectionData.rejection_reason.trim()) {
-      setError('El motivo del rechazo es requerido');
-      return;
-    }
+  // ✅ Aprobar pago - CORREGIDO
+const handleApprovePayment = async () => {
+  // 🔥 QUITAR VALIDACIÓN INCORRECTA - No necesita motivo para aprobar
+  if (!selectedPayment) {
+    setError('No se ha seleccionado ningún pago');
+    return;
+  }
 
-    try {
-      setActionLoading(true);
-      setError('');
+  try {
+    setActionLoading(true);
+    setError('');
 
-      await adminAPI.approvePayment(selectedPayment.calendar_id, {
-        approved_by: user.id,
-        payment_amount: approvalData.payment_amount || null,
-        notes: approvalData.notes || null,
-      });
+    await adminAPI.approvePayment(selectedPayment.calendar_id, {
+      approved_by: user.id,
+      adminName: user.name || user.email, // 🔥 AGREGAR NOMBRE DEL ADMIN
+      payment_amount: approvalData.payment_amount || selectedPayment.field_hour_price,
+      notes: approvalData.notes || null,
+    });
 
-      setSuccess('Pago aprobado exitosamente');
-      setApproveModalOpen(false);
-      
-      // Recargar datos
-      await loadData();
+    setSuccess(`Pago aprobado exitosamente para ${selectedPayment.user_name}`);
+    setApproveModalOpen(false);
+    
+    // Limpiar formulario
+    setApprovalData({
+      payment_amount: '',
+      notes: '',
+    });
+    
+    // Recargar datos
+    await loadData();
 
-    } catch (err) {
-      console.error('❌ Error aprobando pago:', err);
-      setError(`Error aprobando pago: ${err.message}`);
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error('❌ Error aprobando pago:', err);
+    setError(`Error aprobando pago: ${err.response?.data?.message || err.message}`);
+  } finally {
+    setActionLoading(false);
+  }
+};
 
-  // ❌ Rechazar pago
-  const handleRejectPayment = async () => {
-    if (!selectedPayment || !rejectionData.rejection_reason.trim()) {
-      setError('El motivo del rechazo es requerido');
-      return;
-    }
+// ❌ Rechazar pago - MANTENER VALIDACIÓN CORRECTA
+const handleRejectPayment = async () => {
+  if (!selectedPayment) {
+    setError('No se ha seleccionado ningún pago');
+    return;
+  }
 
-    try {
-      setActionLoading(true);
-      setError('');
+  if (!rejectionData.rejection_reason.trim()) {
+    setError('El motivo del rechazo es requerido');
+    return;
+  }
 
-      await adminAPI.rejectPayment(selectedPayment.calendar_id, {
-        rejected_by: user.id,
-        rejection_reason: rejectionData.rejection_reason,
-      });
+  try {
+    setActionLoading(true);
+    setError('');
 
-      setSuccess('Pago rechazado exitosamente');
-      setRejectModalOpen(false);
-      
-      // Recargar datos
-      await loadData();
+    await adminAPI.rejectPayment(selectedPayment.calendar_id, {
+      rejected_by: user.id,
+      adminName: user.name || user.email, // 🔥 AGREGAR NOMBRE DEL ADMIN
+      rejection_reason: rejectionData.rejection_reason.trim(),
+    });
 
-    } catch (err) {
-      console.error('❌ Error rechazando pago:', err);
-      setError(`Error rechazando pago: ${err.message}`);
-    } finally {
-      setActionLoading(false);
-    }
-  };
+    setSuccess(`Pago rechazado exitosamente para ${selectedPayment.user_name}`);
+    setRejectModalOpen(false);
+    
+    // Limpiar formulario
+    setRejectionData({ rejection_reason: '' });
+    
+    // Recargar datos
+    await loadData();
+
+  } catch (err) {
+    console.error('❌ Error rechazando pago:', err);
+    setError(`Error rechazando pago: ${err.response?.data?.message || err.message}`);
+  } finally {
+    setActionLoading(false);
+  }
+};
 
   // 🎨 Función para obtener color del estado
   const getStatusColor = (status) => {
