@@ -19,6 +19,7 @@ import Users from './pages/Users/Users';
 import Fields from './pages/Fields/Fields';
 import Companies from './pages/Companies/Companies';
 import Bookings from './pages/Bookings/Bookings';
+import BankAccounts from './pages/admin/BankAccounts';
 
 // 🎨 Tema personalizado de Material-UI
 const theme = createTheme({
@@ -150,6 +151,15 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Bookings />
+                </Layout>
+              </ProtectedRoute>
+            } />
+
+            {/* 🆕 NUEVA RUTA: Cuentas Bancarias */}
+            <Route path="/bank-accounts" element={
+              <ProtectedRoute>
+                <Layout>
+                  <BankAccounts />
                 </Layout>
               </ProtectedRoute>
             } />

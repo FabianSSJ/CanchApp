@@ -1,3 +1,4 @@
+//lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +16,7 @@ import 'screens/fields_list_screen.dart';
 import 'screens/field_detail_screen.dart';
 import 'screens/client/field_reservation_screen.dart';
 import 'screens/my_reservations_screen.dart';
+import 'screens/payment_accounts_screen.dart';
 
 void main() {
   runApp(
@@ -95,6 +97,7 @@ class MyApp extends StatelessWidget {
         '/field_detail': (context) => const FieldDetailScreen(),
         '/field-reservation': (context) => const FieldReservationScreen(),
         '/my-reservations': (context) => const MyReservationsScreen(),
+        '/payment-accounts': (context) => const PaymentAccountsScreen(),
       },
     );
   }

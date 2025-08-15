@@ -33,6 +33,7 @@ import {
   Notifications as NotificationsIcon,
   SportsFootball,
   CalendarToday as CalendarTodayIcon,
+  AccountBalance as BankIcon, // 🆕 NUEVO ICONO
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -107,6 +108,13 @@ const Layout = ({ children }) => {
       icon: <CalendarTodayIcon />,
       path: '/bookings',
       color: '#795548',
+    },
+    // 🆕 NUEVO ÍTEM: Cuentas Bancarias
+    {
+      text: 'Cuentas Bancarias',
+      icon: <BankIcon />,
+      path: '/bank-accounts',
+      color: '#00695c',
     },
   ];
 
