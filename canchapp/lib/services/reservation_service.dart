@@ -61,12 +61,15 @@ class ReservationService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
         
-        if (data['success'] == true) {
+        // 🔥 FIX: Verificar tanto 'success' como 'status' para compatibilidad
+        bool isSuccess = data['success'] == true || data['status'] == true;
+        
+        if (isSuccess) {
           print('✅ Reserva creada exitosamente');
           return {
             'success': true,
             'message': data['message'] ?? 'Reserva creada exitosamente',
-            'data': data['data'],
+            'data': data['info'] ?? data['data'], // 🔥 FIX: Verificar 'info' también
           };
         } else {
           print('❌ Error en la respuesta: ${data['message']}');
@@ -112,11 +115,14 @@ class ReservationService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         
-        if (data['success'] == true) {
+        // 🔥 FIX: Verificar tanto 'success' como 'status'
+        bool isSuccess = data['success'] == true || data['status'] == true;
+        
+        if (isSuccess) {
           print('✅ Horarios obtenidos exitosamente');
           return {
             'success': true,
-            'data': data['data'],
+            'data': data['data'] ?? data['info'],
           };
         } else {
           return {
@@ -145,33 +151,36 @@ class ReservationService {
       print('🔍 Obteniendo reservas del usuario: $userId');
 
       final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    
-    if (token == null || token.isEmpty) {
-      return {
-        'success': false,
-        'message': 'No se encontró token de autenticación',
-      };
-    }
+      final token = prefs.getString('token');
+      
+      if (token == null || token.isEmpty) {
+        return {
+          'success': false,
+          'message': 'No se encontró token de autenticación',
+        };
+      }
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/calendars/user/$userId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token', // 🔥 AGREGAR TOKEN
-      },
-    );
+      final response = await http.get(
+        Uri.parse('$baseUrl/calendars/user/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
       print('📥 Respuesta reservas - Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         
-        if (data['success'] == true) {
+        // 🔥 FIX: Verificar tanto 'success' como 'status'
+        bool isSuccess = data['success'] == true || data['status'] == true;
+        
+        if (isSuccess) {
           print('✅ Reservas obtenidas exitosamente');
           return {
             'success': true,
-            'data': data['data'],
+            'data': data['data'] ?? data['info'],
           };
         } else {
           return {
@@ -211,7 +220,10 @@ class ReservationService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         
-        if (data['success'] == true) {
+        // 🔥 FIX: Verificar tanto 'success' como 'status'
+        bool isSuccess = data['success'] == true || data['status'] == true;
+        
+        if (isSuccess) {
           print('✅ Reserva cancelada exitosamente');
           return {
             'success': true,
@@ -255,11 +267,14 @@ class ReservationService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         
-        if (data['success'] == true) {
+        // 🔥 FIX: Verificar tanto 'success' como 'status'
+        bool isSuccess = data['success'] == true || data['status'] == true;
+        
+        if (isSuccess) {
           print('✅ Detalles obtenidos exitosamente');
           return {
             'success': true,
-            'data': data['data'],
+            'data': data['data'] ?? data['info'],
           };
         } else {
           return {
@@ -350,11 +365,14 @@ class ReservationService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         
-        if (data['success'] == true) {
+        // 🔥 FIX: Verificar tanto 'success' como 'status'
+        bool isSuccess = data['success'] == true || data['status'] == true;
+        
+        if (isSuccess) {
           print('✅ Estadísticas obtenidas exitosamente');
           return {
             'success': true,
-            'data': data['data'],
+            'data': data['data'] ?? data['info'],
           };
         } else {
           return {
@@ -401,6 +419,4 @@ class ReservationService {
     final timeRegex = RegExp(r'^([01]?[0-9]|2[0-3]):[0-5][0-9]$');
     return timeRegex.hasMatch(time);
   }
-  
-  
 }

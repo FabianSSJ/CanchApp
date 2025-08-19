@@ -533,7 +533,7 @@ class _FieldReservationScreenState extends State<FieldReservationScreen> {
     );
   }
 
-  // 🆕 WIDGET PARA LA TARJETA DE CUENTA DEL ADMIN (MÁS PROMINENTE)
+  // 🆕 WIDGET PARA LA TARJETA DE CUENTA DEL ADMIN CON CÉDULA
   Widget _buildAdminBankCard(BankAccount account) {
     return Container(
       decoration: BoxDecoration(
@@ -619,7 +619,7 @@ class _FieldReservationScreenState extends State<FieldReservationScreen> {
             
             const SizedBox(height: 16),
             
-            // Número de cuenta destacado
+            // Información de cuenta y cédula
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -630,36 +630,42 @@ class _FieldReservationScreenState extends State<FieldReservationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Número de cuenta',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
+                  // 🆕 NÚMERO DE CUENTA
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          account.formattedNumber,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                            letterSpacing: 2,
-                            color: AppColors.gray900,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Número de cuenta',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              account.formattedNumber,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                letterSpacing: 2,
+                                color: AppColors.gray900,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      // 🆕 Botón para copiar
+                      // Botón para copiar número de cuenta
                       IconButton(
                         onPressed: () {
-                          // TODO: Implementar copia al portapapeles
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Número copiado al portapapeles'),
+                              content: Text('Número de cuenta copiado'),
                               backgroundColor: AppColors.primaryGreen,
+                              duration: Duration(seconds: 2),
                             ),
                           );
                         },
@@ -675,6 +681,66 @@ class _FieldReservationScreenState extends State<FieldReservationScreen> {
                       ),
                     ],
                   ),
+                  
+                  // 🆕 CÉDULA DEL TITULAR (si existe)
+                  if (account.accountCi != null && account.accountCi!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      height: 1,
+                      color: AppColors.gray200,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Cédula del titular',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                account.accountCi!,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  letterSpacing: 1,
+                                  color: AppColors.gray900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Botón para copiar cédula
+                        IconButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Cédula copiada'),
+                                backgroundColor: AppColors.primaryGreen,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.copy,
+                            color: AppColors.primaryGreen,
+                            size: 18,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: AppColors.primaryGreen.withOpacity(0.1),
+                            padding: const EdgeInsets.all(6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -690,18 +756,20 @@ class _FieldReservationScreenState extends State<FieldReservationScreen> {
                   size: 16,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Titular: ${account.accountOwner}',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    'Titular: ${account.accountOwner}',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
             ),
             
-            // 🆕 Monto a transferir
+            // 🆕 Monto a transferir (cuando hay horario seleccionado)
             if (_selectedTimeSlot != null) ...[
               const SizedBox(height: 16),
               Container(
