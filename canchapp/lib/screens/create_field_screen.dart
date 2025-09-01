@@ -1119,7 +1119,8 @@ class _RecurringReservationDialogState extends State<_RecurringReservationDialog
     }
 
     final reservation = {
-      'user_id': 999, // ID temporal - se debe obtener del cliente real
+      'user_id': null, 
+      'created_by_owner_id': null,
       'recurring_type': 'semanal',
       'day_of_week': _selectedDay,
       'start_time': '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}:00',

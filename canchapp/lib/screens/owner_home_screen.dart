@@ -329,7 +329,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
               ],
 
               const SizedBox(height: 10),
@@ -346,7 +346,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 1.5,
+                childAspectRatio: 1.3,
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
                 children: [
@@ -377,7 +377,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                 ],
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               const Text(
                 'Gestión Rápida',
                 style: TextStyle(
@@ -391,7 +391,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                 crossAxisCount: 4,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 0.9,
+                childAspectRatio: 0.8,
                 children: [
                   _buildActionButton(context, 'Agregar Cancha', Icons.add, Colors.blue),
                   _buildActionButton(context, 'Reservas', Icons.calendar_today, Colors.green),
@@ -400,7 +400,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                 ],
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -472,7 +472,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                 ),
               ],
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
               const Text(
                 'Estadísticas Mensuales',
                 style: TextStyle(
@@ -483,7 +483,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
               ),
               const SizedBox(height: 15),
               Container(
-                height: 200,
+                height: 160,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(15),

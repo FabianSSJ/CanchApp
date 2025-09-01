@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FieldService {
   // URL base de tu API
@@ -126,7 +127,7 @@ class FieldService {
     }
   }
 
-  // 🆕 NUEVO MÉTODO - CON HORARIOS Y RESERVAS RECURRENTES
+  // 🆕 NUEVO MÉTODO - CON HORARIOS Y RESERVAS RECURRENTES - CORREGIDO COMPLETO
   static Future<Map<String, dynamic>> createFieldWithSchedules({
     required String token,
     required int companyId,
@@ -163,10 +164,28 @@ class FieldService {
         print('📅 Horarios agregados: ${schedules.length}');
       }
 
-      // 🆕 AGREGAR RESERVAS RECURRENTES si se proporcionan
+      // 🆕 AGREGAR RESERVAS RECURRENTES si se proporcionan - CORREGIDO
       if (recurringReservations != null && recurringReservations.isNotEmpty) {
-        fieldData['recurring_reservations'] = recurringReservations;
-        print('🔄 Reservas recurrentes agregadas: ${recurringReservations.length}');
+        // Obtener usuario actual para llenar created_by_owner_id
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        int? currentUserId = prefs.getInt('user_id');
+        
+        if (currentUserId == null) {
+          return {
+            'success': false,
+            'message': 'Usuario no autenticado para crear reservas fijas.',
+          };
+        }
+        
+        // Corregir las reservas recurrentes
+        final fixedReservations = recurringReservations.map((reservation) {
+          final fixed = Map<String, dynamic>.from(reservation);
+          fixed['created_by_owner_id'] = currentUserId; // Llenar con ID del usuario actual
+          return fixed;
+        }).toList();
+        
+        fieldData['recurring_reservations'] = fixedReservations;
+        print('🔄 Reservas recurrentes corregidas: ${fixedReservations.length}');
       }
 
       print('📤 Request Body: ${json.encode(fieldData)}');
@@ -188,7 +207,7 @@ class FieldService {
         return {
           'success': true,
           'message': responseData['message'] ?? 'Cancha creada exitosamente',
-          'data': responseData['data'],
+          'data': responseData['info'] ?? responseData['data'],
         };
       } else {
         final errorData = json.decode(response.body);
