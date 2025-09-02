@@ -91,7 +91,7 @@ class BookingService {
         final responseData = json.decode(response.body);
         
         List<Map<String, dynamic>> bookings = [];
-        if (responseData['success'] == true && responseData['data'] is List) {
+        if (responseData['status'] == true && responseData['data'] is List) {
           bookings = List<Map<String, dynamic>>.from(responseData['data']);
         }
         
@@ -108,7 +108,7 @@ class BookingService {
         }).toList();
         
         return {
-          'success': true,
+          'success': responseData['status'] ?? false,
           'data': formattedBookings,
           'message': 'Próximas reservas obtenidas exitosamente',
         };

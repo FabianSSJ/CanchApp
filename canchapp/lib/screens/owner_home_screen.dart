@@ -18,13 +18,14 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
   int? companyId;
   bool _isLoading = true;
   
-  // Datos reales
+  // Variables corregidas con valores por defecto seguros
   Map<String, dynamic> businessSummary = {
-    'todayBookings': 0,
-    'monthlyIncome': 0.0,
+    'fieldsReservedToday': 0,
+    'dailyIncome': 0.0,
     'activeFields': 0,
-    'newClients': 0,
+    'totalClients': 0,
   };
+  String selectedPeriod = 'day';
   
   List<Map<String, dynamic>> upcomingBookings = [];
   List<Map<String, dynamic>> weeklyStats = [];
@@ -64,7 +65,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
       final token = prefs.getString('token') ?? '';
       
       print('🔄 CARGANDO DATOS REALES DEL NEGOCIO');
-      print('Token: ${token.substring(0, 20)}...');
+      print('Token: ${token.length > 20 ? token.substring(0, 20) + '...' : token}');
       print('Company ID: $companyId');
       
       // Cargar datos en paralelo
@@ -98,21 +99,23 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
       
       print('📊 Dashboard result: $result');
       
-      if (result['success']) {
+      if (result['success'] == true) {
         setState(() {
-          businessSummary['todayBookings'] = result['todayBookings'] ?? 0;
-          businessSummary['monthlyIncome'] = result['monthlyIncome'] ?? 0.0;
+          businessSummary['fieldsReservedToday'] = result['fieldsReservedToday'] ?? 0;
+          businessSummary['dailyIncome'] = (result['dailyIncome'] is num) 
+            ? (result['dailyIncome'] as num).toDouble() 
+            : 0.0;
           businessSummary['activeFields'] = result['activeFields'] ?? 0;
-          businessSummary['newClients'] = result['newClients'] ?? 0;
+          businessSummary['totalClients'] = result['totalClients'] ?? 0;
         });
         
         print('✅ Dashboard stats cargadas exitosamente');
-        print('   - Reservas hoy: ${businessSummary['todayBookings']}');
-        print('   - Ingresos mes: ${businessSummary['monthlyIncome']}');
+        print('   - Canchas reservadas hoy: ${businessSummary['fieldsReservedToday']}');
+        print('   - Ingresos de hoy: ${businessSummary['dailyIncome']}');
         print('   - Canchas activas: ${businessSummary['activeFields']}');
-        print('   - Clientes nuevos: ${businessSummary['newClients']}');
+        print('   - Clientes totales: ${businessSummary['totalClients']}');
       } else {
-        print('❌ Error en dashboard stats: ${result['message']}');
+        print('❌ Error en dashboard stats: ${result['message'] ?? 'Error desconocido'}');
       }
     } catch (e) {
       print('❌ Excepción en _loadDashboardStats: $e');
@@ -131,14 +134,17 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
       
       print('📅 Upcoming bookings result: $result');
       
-      if (result['success']) {
+      if (result['success'] == true) {
         setState(() {
-          upcomingBookings = List<Map<String, dynamic>>.from(result['data'] ?? []);
+          final data = result['data'];
+          upcomingBookings = data is List 
+            ? List<Map<String, dynamic>>.from(data) 
+            : [];
         });
         
         print('✅ Próximas reservas cargadas: ${upcomingBookings.length}');
       } else {
-        print('❌ Error en upcoming bookings: ${result['message']}');
+        print('❌ Error en upcoming bookings: ${result['message'] ?? 'Error desconocido'}');
       }
     } catch (e) {
       print('❌ Excepción en _loadUpcomingBookings: $e');
@@ -154,12 +160,17 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
         companyId: companyId!,
       );
       
-      if (result['success']) {
+      if (result['success'] == true) {
         setState(() {
-          weeklyStats = List<Map<String, dynamic>>.from(result['chartData'] ?? []);
+          final chartData = result['chartData'];
+          weeklyStats = chartData is List 
+            ? List<Map<String, dynamic>>.from(chartData) 
+            : [];
         });
         
         print('✅ Estadísticas semanales cargadas: ${weeklyStats.length}');
+      } else {
+        print('❌ Error en weekly stats: ${result['message'] ?? 'Error desconocido'}');
       }
     } catch (e) {
       print('❌ Error en _loadWeeklyStats: $e');
@@ -179,25 +190,24 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context); // Cerrar diálogo
+              Navigator.pop(context);
               
-              // Limpiar datos de sesión
               final prefs = await SharedPreferences.getInstance();
               await prefs.clear();
               
-              // Mostrar mensaje
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Sesión cerrada correctamente'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-              
-              // Navegar al login
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/login',
-                (route) => false,
-              );
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Sesión cerrada correctamente'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login',
+                  (route) => false,
+                );
+              }
             },
             child: const Text(
               'Cerrar Sesión',
@@ -223,7 +233,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hola, $userName'),
+        title: Text('Hola, ${userName ?? 'Usuario'}'),
         centerTitle: false,
         backgroundColor: const Color(0xFF059669),
         foregroundColor: Colors.white,
@@ -299,7 +309,6 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Información de la empresa
               if (companyId == null) ...[
                 Container(
                   width: double.infinity,
@@ -351,26 +360,26 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                 mainAxisSpacing: 15,
                 children: [
                   _buildSummaryCard(
-                    'Reservas Hoy',
-                    '${businessSummary['todayBookings']}',
+                    'Canchas Reservadas',
+                    '${businessSummary['fieldsReservedToday'] ?? 0}',
                     MdiIcons.calendarCheck,
                     Colors.blue,
                   ),
                   _buildSummaryCard(
-                    'Ingresos Mensuales',
-                    '\$${businessSummary['monthlyIncome'].toStringAsFixed(2)}',
+                    'Ingresos de hoy',
+                    '\$${((businessSummary['dailyIncome'] as num?) ?? 0.0).toStringAsFixed(2)}',
                     MdiIcons.cash,
                     Colors.green,
                   ),
                   _buildSummaryCard(
                     'Canchas Activas',
-                    '${businessSummary['activeFields']}',
+                    '${businessSummary['activeFields'] ?? 0}',
                     MdiIcons.soccerField,
                     Colors.orange,
                   ),
                   _buildSummaryCard(
-                    'Clientes Nuevos',
-                    '${businessSummary['newClients']}',
+                    'Clientes Totales',
+                    '${businessSummary['totalClients'] ?? 0}',
                     MdiIcons.accountGroup,
                     Colors.purple,
                   ),
@@ -425,7 +434,6 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
               ),
               const SizedBox(height: 10),
               
-              // Próximas reservas
               if (upcomingBookings.isEmpty) ...[
                 Container(
                   width: double.infinity,
@@ -465,16 +473,16 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
               ] else ...[
                 ...upcomingBookings.take(3).map((booking) => 
                   _buildReservationItem(
-                    booking['field_name'] ?? 'Cancha',
-                    booking['client_name'] ?? 'Cliente',
-                    booking['time_range'] ?? 'Horario',
+                    booking['field_name']?.toString() ?? 'Cancha',
+                    booking['client_name']?.toString() ?? 'Cliente',
+                    booking['time_range']?.toString() ?? 'Horario',
                   ),
                 ),
               ],
 
               const SizedBox(height: 20),
               const Text(
-                'Estadísticas Mensuales',
+                'Estadísticas Semanales',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -525,28 +533,37 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                         ],
                       )
                     : Column(
-                        children: [
-                          Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                _buildChartBar(80, 'Lun'),
-                                _buildChartBar(120, 'Mar'),
-                                _buildChartBar(160, 'Mié'),
-                                _buildChartBar(200, 'Jue'),
-                                _buildChartBar(180, 'Vie'),
-                                _buildChartBar(140, 'Sáb'),
-                                _buildChartBar(100, 'Dom'),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Reservas por día',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                        ],
-                      ),
+  children: [
+    Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: weeklyStats.isNotEmpty
+          ? weeklyStats.map((stat) {
+              final reservations = (stat['reservations'] as num?)?.toDouble() ?? 0.0;
+              final day = stat['day']?.toString() ?? '';
+              final shortDay = day.length > 3 ? day.substring(0, 3) : day;
+              return _buildChartBar(reservations * 10, shortDay);
+            }).toList()
+          : [
+              // Mostrar gráfico vacío o mensaje
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    'Sin datos',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+            ],
+      ),
+    ),
+    const SizedBox(height: 10),
+    Text(
+      weeklyStats.isNotEmpty ? 'Reservas por día (últimos 7 días)' : 'No hay reservas esta semana',
+      style: const TextStyle(fontSize: 14, color: Colors.grey),
+    ),
+  ],
+)
               ),
             ],
           ),
@@ -567,7 +584,6 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
         onTap: (index) {
           switch (index) {
             case 0:
-              // Ya estamos en home
               break;
             case 1:
               Navigator.pushNamed(context, '/owner_bookings');
@@ -726,7 +742,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Container(
-            height: height / 3,
+            height: (height / 3).clamp(5.0, 50.0), // Limitar altura entre 5 y 50
             width: 20,
             decoration: BoxDecoration(
               color: const Color(0xFF059669),
@@ -734,7 +750,11 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
             ),
           ),
           const SizedBox(height: 5),
-          Text(label, style: const TextStyle(fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );

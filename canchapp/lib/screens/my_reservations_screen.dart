@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/reservation_service.dart';
 import '../utils/colors.dart';
 
-
 class MyReservationsScreen extends StatefulWidget {
   const MyReservationsScreen({super.key});
 
@@ -70,21 +69,43 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
     }
   }
 
+  // 🆕 FUNCIÓN PARA MAPEAR ESTADOS DEL BACKEND AL FRONTEND
+  String _mapBackendStateToFrontend(String backendState) {
+    switch (backendState) {
+      case 'Por Confirmar':
+        return 'Pendiente';
+      case 'Reservada':
+        return 'Confirmada';
+      case 'Disponible':
+        return 'Disponible'; // No se mostrará en filtros
+      default:
+        return backendState; // Mantener otros estados como están
+    }
+  }
+
   void _applyFilter(String filter) {
     setState(() {
       _selectedFilter = filter;
       if (filter == 'Todas') {
-        _filteredReservations = _reservations;
+        // Filtrar solo las reservas que NO sean "Disponible"
+        _filteredReservations = _reservations.where((reservation) {
+          String mappedState = _mapBackendStateToFrontend(reservation['calendar_state']);
+          return mappedState != 'Disponible';
+        }).toList();
       } else {
         _filteredReservations = _reservations.where((reservation) {
-          return reservation['calendar_state'] == filter;
+          String mappedState = _mapBackendStateToFrontend(reservation['calendar_state']);
+          return mappedState == filter;
         }).toList();
       }
     });
   }
 
   Color _getStatusColor(String status) {
-    switch (status) {
+    // Mapear el estado antes de obtener el color
+    String mappedStatus = _mapBackendStateToFrontend(status);
+    
+    switch (mappedStatus) {
       case 'Pendiente':
         return Colors.orange;
       case 'Confirmada':
@@ -101,7 +122,10 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
   }
 
   IconData _getStatusIcon(String status) {
-    switch (status) {
+    // Mapear el estado antes de obtener el ícono
+    String mappedStatus = _mapBackendStateToFrontend(status);
+    
+    switch (mappedStatus) {
       case 'Pendiente':
         return Icons.access_time;
       case 'Confirmada':
@@ -118,7 +142,10 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
   }
 
   String _getStatusMessage(String status) {
-    switch (status) {
+    // Mapear el estado antes de obtener el mensaje
+    String mappedStatus = _mapBackendStateToFrontend(status);
+    
+    switch (mappedStatus) {
       case 'Pendiente':
         return 'Tu reserva está siendo revisada por el administrador';
       case 'Confirmada':
@@ -135,11 +162,17 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
   }
 
   Map<String, int> _getStatusCounts() {
+    // Filtrar reservas disponibles y mapear estados
+    final validReservations = _reservations.where((r) {
+      String mappedState = _mapBackendStateToFrontend(r['calendar_state']);
+      return mappedState != 'Disponible';
+    }).toList();
+
     return {
-      'total': _reservations.length,
-      'pendientes': _reservations.where((r) => r['calendar_state'] == 'Pendiente').length,
-      'confirmadas': _reservations.where((r) => r['calendar_state'] == 'Confirmada').length,
-      'rechazadas': _reservations.where((r) => r['calendar_state'] == 'Rechazada').length,
+      'total': validReservations.length,
+      'pendientes': validReservations.where((r) => _mapBackendStateToFrontend(r['calendar_state']) == 'Pendiente').length,
+      'confirmadas': validReservations.where((r) => _mapBackendStateToFrontend(r['calendar_state']) == 'Confirmada').length,
+      'rechazadas': validReservations.where((r) => _mapBackendStateToFrontend(r['calendar_state']) == 'Rechazada').length,
     };
   }
 
@@ -429,6 +462,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
 
   Widget _buildReservationCard(Map<String, dynamic> reservation) {
     final status = reservation['calendar_state'] ?? 'Desconocido';
+    final mappedStatus = _mapBackendStateToFrontend(status); // Mapear estado
     final fieldName = reservation['field_name'] ?? 'Cancha';
     final companyName = reservation['company_name'] ?? 'Empresa';
     final date = reservation['calendar_date'] ?? '';
@@ -488,7 +522,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        status,
+                        mappedStatus, // Mostrar estado mapeado
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

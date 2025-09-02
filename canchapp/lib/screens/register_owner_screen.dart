@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Para inputFormatters
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -55,13 +56,13 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
   Future<void> _submitUserForm() async {
     if (_userFormKey.currentState!.validate()) {
       _userFormKey.currentState!.save();
-      
+
       setState(() {
         _isLoading = true;
       });
 
       _userData['user_hashed_password'] = _password;
-      
+
       try {
         final response = await http.post(
           Uri.parse('http://10.0.2.2:3000/users/create'),
@@ -77,7 +78,15 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
           // Usuario creado exitosamente, ahora hacer login para obtener token
           await _loginUser();
         } else {
-          _showErrorDialog('Error al crear usuario', response.body);
+          // Parsear el mensaje de error del servidor
+          String message = 'Error desconocido';
+          try {
+            final responseBody = json.decode(response.body);
+            message = responseBody['message'] ?? message;
+          } catch (e) {
+            message = 'No se pudo procesar el error.';
+          }
+          _showErrorDialog('Error', message);
         }
       } catch (e) {
         setState(() {
@@ -119,7 +128,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
   Future<void> _submitCompanyForm() async {
     if (_companyFormKey.currentState!.validate()) {
       _companyFormKey.currentState!.save();
-      
+
       setState(() {
         _isLoading = true;
       });
@@ -142,7 +151,15 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
           // Empresa creada exitosamente
           _showSuccessDialog();
         } else {
-          _showErrorDialog('Error al crear empresa', response.body);
+          // Parsear mensaje de error
+          String message = 'Error desconocido';
+          try {
+            final responseBody = json.decode(response.body);
+            message = responseBody['message'] ?? message;
+          } catch (e) {
+            message = 'No se pudo procesar el error.';
+          }
+          _showErrorDialog('Error', message);
         }
       } catch (e) {
         setState(() {
@@ -177,16 +194,60 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
     }
   }
 
+  // ✅ Diálogo de error mejorado (acorde al diseño verde)
   void _showErrorDialog(String title, String message) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[700], size: 24),
+            SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF333333),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+            height: 1.5,
+          ),
+          textAlign: TextAlign.center,
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF2E7D32),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              ),
+              child: Text(
+                'OK',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -199,14 +260,34 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         title: const Text('¡Registro Exitoso!'),
-        content: const Text('Tu cuenta de dueño y empresa han sido creadas correctamente. Ahora puedes iniciar sesión.'),
+        content: const Text(
+          'Tu cuenta de dueño y empresa han sido creadas correctamente. Ahora puedes iniciar sesión.',
+          textAlign: TextAlign.center,
+        ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-            child: const Text('Ir a Login'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF2E7D32),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              ),
+              child: Text(
+                'Ir a Login',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -248,7 +329,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                 ],
               ),
             ),
-            
+
             // Contenido de los pasos
             Expanded(
               child: PageView(
@@ -346,7 +427,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
               ],
             ),
           ),
-          
+
           // Formulario de usuario
           Card(
             elevation: 4,
@@ -375,11 +456,22 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      onSaved: (value) => _userData['user_name'] = value ?? '',
-                      validator: (value) => (value == null || value.isEmpty) ? 'Requerido' : null,
+                      keyboardType: TextInputType.name,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$')),
+                      ],
+                      onSaved: (value) => _userData['user_name'] = value?.trim() ?? '',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Requerido';
+                        if (value.trim().length < 2) return 'Nombre muy corto';
+                        if (!RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$').hasMatch(value)) {
+                          return 'Solo letras y espacios';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Apellido
                     TextFormField(
                       decoration: InputDecoration(
@@ -395,11 +487,22 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      onSaved: (value) => _userData['user_last_name'] = value ?? '',
-                      validator: (value) => (value == null || value.isEmpty) ? 'Requerido' : null,
+                      keyboardType: TextInputType.name,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$')),
+                      ],
+                      onSaved: (value) => _userData['user_last_name'] = value?.trim() ?? '',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Requerido';
+                        if (value.trim().length < 2) return 'Apellido muy corto';
+                        if (!RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$').hasMatch(value)) {
+                          return 'Solo letras y espacios';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Email
                     TextFormField(
                       decoration: InputDecoration(
@@ -416,15 +519,18 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      onSaved: (value) => _userData['user_email'] = value ?? '',
+                      onSaved: (value) => _userData['user_email'] = value?.trim() ?? '',
                       validator: (value) {
                         if (value == null || value.isEmpty) return 'Requerido';
-                        if (!value.contains('@')) return 'Email inválido';
+                        final emailRegex = RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                        );
+                        if (!emailRegex.hasMatch(value)) return 'Email inválido';
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Contraseña
                     TextFormField(
                       decoration: InputDecoration(
@@ -460,7 +566,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Confirmar Contraseña
                     TextFormField(
                       decoration: InputDecoration(
@@ -491,14 +597,12 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                       onChanged: (value) => _confirmPassword = value,
                       validator: (value) {
                         if (value == null || value.isEmpty) return 'Por favor repita la contraseña';
-                        if (value != _password) {
-                          return 'Las contraseñas no coinciden';
-                        }
+                        if (value != _password) return 'Las contraseñas no coinciden';
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Teléfono
                     TextFormField(
                       decoration: InputDecoration(
@@ -515,11 +619,20 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                       keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
                       onSaved: (value) => _userData['user_phone'] = value ?? '',
-                      validator: (value) => (value == null || value.isEmpty) ? 'Requerido' : null,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Requerido';
+                        if (value.length < 7) return 'Teléfono inválido';
+                        if (value.length > 15) return 'Demasiados dígitos';
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 30),
-                    
+
                     // Botón Siguiente
                     SizedBox(
                       width: double.infinity,
@@ -612,7 +725,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
               ],
             ),
           ),
-          
+
           // Formulario de empresa
           Card(
             elevation: 4,
@@ -641,11 +754,18 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      onSaved: (value) => _companyData['company_name'] = value ?? '',
-                      validator: (value) => (value == null || value.isEmpty) ? 'Requerido' : null,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\-\.]+$')),
+                      ],
+                      onSaved: (value) => _companyData['company_name'] = value?.trim() ?? '',
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Requerido';
+                        if (value.trim().length < 2) return 'Nombre muy corto';
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Email de la empresa
                     TextFormField(
                       decoration: InputDecoration(
@@ -662,15 +782,18 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      onSaved: (value) => _companyData['company_email'] = value ?? '',
+                      onSaved: (value) => _companyData['company_email'] = value?.trim() ?? '',
                       validator: (value) {
                         if (value == null || value.isEmpty) return 'Requerido';
-                        if (!value.contains('@')) return 'Email inválido';
+                        final emailRegex = RegExp(
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                        );
+                        if (!emailRegex.hasMatch(value)) return 'Email inválido';
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Teléfono de la empresa
                     TextFormField(
                       decoration: InputDecoration(
@@ -687,11 +810,20 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                       keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
                       onSaved: (value) => _companyData['company_phone'] = value ?? '',
-                      validator: (value) => (value == null || value.isEmpty) ? 'Requerido' : null,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Requerido';
+                        if (value.length < 7) return 'Teléfono inválido';
+                        if (value.length > 15) return 'Demasiados dígitos';
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Ubicación
                     TextFormField(
                       decoration: InputDecoration(
@@ -708,10 +840,14 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                       onSaved: (value) => _companyData['company_location'] = value ?? '',
-                      validator: (value) => (value == null || value.isEmpty) ? 'Requerido' : null,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Requerido';
+                        if (!value.startsWith('http')) return 'Debe ser un enlace válido';
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Descripción
                     TextFormField(
                       decoration: InputDecoration(
@@ -731,7 +867,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                       onSaved: (value) => _companyData['company_description'] = value ?? '',
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Servicios
                     TextFormField(
                       decoration: InputDecoration(
@@ -751,7 +887,7 @@ class _RegisterOwnerScreenState extends State<RegisterOwnerScreen> {
                       onSaved: (value) => _companyData['company_services'] = value ?? '',
                     ),
                     const SizedBox(height: 30),
-                    
+
                     // Botones
                     Row(
                       children: [
