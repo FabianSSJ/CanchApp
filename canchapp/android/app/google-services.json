@@ -1,0 +1,124 @@
+{
+  "project_info": {
+    "project_number": "902641372751",
+    "project_id": "uide-43a9f",
+    "storage_bucket": "uide-43a9f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902641372751:android:f3bc1bced5dca65a4f243a",
+        "android_client_info": {
+          "package_name": "com.example.flutter_app_push_maps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH4kAHa8Kee45ZKIjNKCUSpOOF-4urCmk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902641372751:android:52fbfb43586efde64f243a",
+        "android_client_info": {
+          "package_name": "com.example.flutter_notificaciones"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH4kAHa8Kee45ZKIjNKCUSpOOF-4urCmk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902641372751:android:c637d76cd78bed114f243a",
+        "android_client_info": {
+          "package_name": "com.example.prueba"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH4kAHa8Kee45ZKIjNKCUSpOOF-4urCmk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902641372751:android:33a935f1fdd5424b4f243a",
+        "android_client_info": {
+          "package_name": "com.example.semana_151"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH4kAHa8Kee45ZKIjNKCUSpOOF-4urCmk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902641372751:android:854685aa95078b924f243a",
+        "android_client_info": {
+          "package_name": "com.torneoexpress.torneo_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH4kAHa8Kee45ZKIjNKCUSpOOF-4urCmk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902641372751:android:2f69aa4c171bbbdc4f243a",
+        "android_client_info": {
+          "package_name": "ec.edu.uide.canchapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH4kAHa8Kee45ZKIjNKCUSpOOF-4urCmk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
