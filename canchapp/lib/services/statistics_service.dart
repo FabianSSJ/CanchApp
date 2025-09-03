@@ -147,8 +147,8 @@ class StatisticsService {
         },
       );
 
-      print('📬 Status Code: ${response.statusCode}');
-      print('📄 Response Body: ${response.body}');
+      /*print('📬 Status Code: ${response.statusCode}');
+      print('📄 Response Body: ${response.body}');*/
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -329,14 +329,14 @@ class StatisticsService {
 
   // MÉTODO PARA DEBUGGING: Validar respuesta del backend
   static void logResponse(String endpoint, Map<String, dynamic> response) {
-    print('🔍 RESPONSE DEBUG for $endpoint:');
+    /* print('🔍 RESPONSE DEBUG for $endpoint:');
     print('  - success: ${response['success']}');
     print('  - message: ${response['message']}');
-    print('  - keys: ${response.keys.toList()}');
+    print('  - keys: ${response.keys.toList()}');*/
     
     response.forEach((key, value) {
       if (key != 'success' && key != 'message') {
-        print('  - $key: $value (${value.runtimeType})');
+        // print('  - $key: $value (${value.runtimeType})');
       }
     });
   }

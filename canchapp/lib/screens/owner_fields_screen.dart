@@ -111,7 +111,7 @@ class _OwnerFieldsScreenState extends State<OwnerFieldsScreen> with SingleTicker
       final fieldId = field['field_id'];
       
       // Obtener reservas del último mes para estadísticas
-      final reservationsResult = await BookingService.getFieldReservations(
+      /*final reservationsResult = await BookingService.getFieldReservations(
         token: _token!,
         fieldId: fieldId,
         startDate: DateTime.now().subtract(const Duration(days: 30)).toIso8601String().split('T')[0],
@@ -132,7 +132,7 @@ class _OwnerFieldsScreenState extends State<OwnerFieldsScreen> with SingleTicker
         field['completed_reservations'] = 0;
         field['pending_reservations'] = 0;
         field['monthly_income'] = 0.0;
-      }
+      }*/
     } catch (e) {
       print('Error cargando stats para cancha ${field['field_id']}: $e');
       field['total_reservations'] = 0;
@@ -174,7 +174,7 @@ class _OwnerFieldsScreenState extends State<OwnerFieldsScreen> with SingleTicker
       _showLoadingDialog('Poniendo en mantenimiento...');
 
       // Llamar al backend para cambiar a mantenimiento
-      final result = await FieldService.setFieldMaintenance(
+      /*final result = await FieldService.setFieldMaintenance(
         token: _token!,
         fieldId: fieldId,
       );
@@ -197,7 +197,7 @@ class _OwnerFieldsScreenState extends State<OwnerFieldsScreen> with SingleTicker
         );
       } else {
         _showError(result['message'] ?? 'Error poniendo en mantenimiento');
-      }
+      }*/
     } else {
       // Si está en mantenimiento, mostrar mensaje de que no puede activar
       showDialog(
@@ -267,7 +267,7 @@ class _OwnerFieldsScreenState extends State<OwnerFieldsScreen> with SingleTicker
     try {
       _showLoadingDialog('Eliminando cancha...');
 
-      final result = await FieldService.deleteField(
+      /*final result = await FieldService.deleteField(
         token: _token!,
         fieldId: fieldId,
       );
@@ -287,7 +287,7 @@ class _OwnerFieldsScreenState extends State<OwnerFieldsScreen> with SingleTicker
         );
       } else {
         _showError(result['message'] ?? 'Error eliminando cancha');
-      }
+      }*/
     } catch (e) {
       Navigator.pop(context);
       _showError('Error: $e');
@@ -489,7 +489,7 @@ class _OwnerFieldsScreenState extends State<OwnerFieldsScreen> with SingleTicker
     final totalFields = _fields.length;
     final activeFields = _fields.where((f) => f['field_state'] ?? true).length;
     final totalIncome = _fields.fold(0.0, (sum, f) => sum + (f['monthly_income'] ?? 0.0));
-    final totalReservations = _fields.fold(0, (sum, f) => sum + (f['total_reservations'] ?? 0));
+    final totalReservations = 0;//_fields.fold(0, (sum, f) => sum + (f['total_reservations'] ?? 0));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
