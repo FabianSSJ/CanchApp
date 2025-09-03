@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReservationService {
-  static const String baseUrl = 'http://10.0.2.2:3000'; // Cambia por tu URL de API
+  static const String baseUrl = 'http://104.248.75.98:3000'; // Cambia por tu URL de API
   
   /// Crear una nueva reserva con comprobante de pago
   static Future<Map<String, dynamic>> createReservation({

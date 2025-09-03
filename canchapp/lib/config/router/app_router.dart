@@ -9,7 +9,7 @@ import 'package:canchapp/screens/profile_screen.dart';
 import 'package:canchapp/screens/register_owner_screen.dart';
 import 'package:canchapp/screens/register_player_screen.dart';
 import 'package:canchapp/screens/register_screen.dart';
-import 'package:canchapp/screens/register_type_screen.dart';
+import 'package:canchapp/screens/register_type_screen.dart' hide RegisterTypeScreen;
 import 'package:go_router/go_router.dart';
 
 final appRouter = GoRouter(
@@ -21,7 +21,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/register',
-      builder: (context, state) => const RegisterScreen(),
+      // builder: (context, state) => const RegisterScreen(),
     ),
     GoRoute(
       path: '/register-type',
@@ -47,7 +47,7 @@ final appRouter = GoRouter(
       path: '/owner-home',
       builder: (context, state) {
         final userData = state.extra as Map<String, dynamic>?;
-        return OwnerHomeScreen(userData: userData);
+       // return OwnerHomeScreen(userData: userData);
       },
     ),
     GoRoute(
@@ -70,7 +70,7 @@ final appRouter = GoRouter(
       },
       builder: (context, state) {
         final userData = state.extra as Map<String, dynamic>?;
-        return CreateFieldScreen(userData: userData);
+        //return CreateFieldScreen(userData: userData);
       },
     ),
     GoRoute(
@@ -83,7 +83,7 @@ final appRouter = GoRouter(
       },
       builder: (context, state) {
         final userData = state.extra as Map<String, dynamic>?;
-        return ProfileScreen(userData: userData); // UPDATED: Pasa userData
+        //return ProfileScreen(userData: userData); // UPDATED: Pasa userData
       },
     ),
   ],

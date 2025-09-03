@@ -37,7 +37,7 @@ class CompanyService {
 
       // 3. Enviar la solicitud
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/companies/create'),
+        Uri.parse('http://104.248.75.98:3000/companies/create'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -71,7 +71,7 @@ class CompanyService {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://10.0.2.2:3000/upload'),
+        Uri.parse('http://104.248.75.98:3000/upload'),
       );
 
       request.headers['Authorization'] = 'Bearer $token';
@@ -102,7 +102,7 @@ class CompanyService {
       String token, int userId, int companyId) async {
     try {
       final response = await http.post(
-        Uri.parse('http://100.0.2.2:3000/users/associate-company'),
+        Uri.parse('http://104.248.75.98:3000/users/associate-company'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
