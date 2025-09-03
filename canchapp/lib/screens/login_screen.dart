@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<int?> _getCompanyId(String token, int userId) async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/companies/list'),
+        Uri.parse('http://104.248.75.98:3000/companies/list'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         // Realizar petición HTTP al backend
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:3000/api/login'),
+          Uri.parse('http://104.248.75.98:3000/api/login'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode({
             'user_email': _emailController.text,

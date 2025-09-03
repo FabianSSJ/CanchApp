@@ -454,7 +454,7 @@ const handleRejectPayment = async () => {
           {selectedPayment && (
             <Box textAlign="center">
               <img
-                src={`http://localhost:3000${selectedPayment.calendar_payment_receipt}`}
+                src={`http://104.248.75.98:3000${selectedPayment.calendar_payment_receipt}`}
                 alt="Comprobante"
                 style={{
                   maxWidth: '100%',

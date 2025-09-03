@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class StatisticsService {
-  static const String baseUrl = 'http://10.0.2.2:3000';
+  static const String baseUrl = 'http://104.248.75.98:3000';
 
   // CORREGIDO: Obtener estadísticas del dashboard
   static Future<Map<String, dynamic>> getDashboardStats({

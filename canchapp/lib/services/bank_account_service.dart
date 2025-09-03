@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/bank_account.dart';
 
 class BankAccountService {
-  static const String baseUrl = 'http://10.0.2.2:3000'; // Cambia por tu URL de API
+  static const String baseUrl = 'http://104.248.75.98:3000'; // Cambia por tu URL de API
 
   /// Obtener todas las cuentas bancarias disponibles para pago
   static Future<Map<String, dynamic>> getPaymentAccounts() async {

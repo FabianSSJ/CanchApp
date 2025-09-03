@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class FieldService {
   // URL base de tu API
-  static const String baseUrl = 'http://10.0.2.2:3000';
+  static const String baseUrl = 'http://104.248.75.98:3000';
 
   // Tipos de cancha disponibles
   static List<String> getFieldTypes() {

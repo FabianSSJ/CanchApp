@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // 🔧 Configuración base
-const API_BASE_URL = 'http://localhost:3000'; // Tu backend Node.js
+const API_BASE_URL = 'http://104.248.75.98:3000'; // Tu backend Node.js
 
 // Crear instancia de axios
 const api = axios.create({
